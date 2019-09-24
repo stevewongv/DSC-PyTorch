@@ -5,28 +5,26 @@ from numpy.random import RandomState
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms 
 import PIL.Image as Image
-from randomcrop import RandomRotation,RandomResizedCrop,RandomHorizontallyFlip,RandomVerticallyFlip
+from randomcrop import RandomHorizontallyFlip
 
 class TrainValDataset(Dataset):
     def __init__(self, name):
         super().__init__()
         self.dataset = name
         self.root = '../SBU-shadow/SBUTrain4KRecoveredSmall/'
-        self.imgs = open('../SBU-shadow/SBUTrain4KRecoveredSmall/SBU.txt').readlines()
-        # self.gt    = open('../SBU-shadow/SBUTrain4KRecoveredSmall/SBU.txt').readlines()
+        self.imgs = open(self.dataset).readlines()
         self.file_num = len(self.imgs)
 
         self.hflip = RandomHorizontallyFlip()
         self.trans = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # maybe can optimized.
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) 
         ])
 
     def __len__(self):
         return self.file_num * 100
 
     def __getitem__(self, index):
-        # file_name = self.mat_files[idx % self.file_num]
         image_path,label_path = self.imgs[index % self.file_num][:-1].split(' ')
         image = Image.open(self.root + image_path).convert('RGB').resize((400,400))
         label = Image.open(self.root + label_path).convert('L').resize((400,400))
@@ -56,26 +54,23 @@ class TestDataset(Dataset):
         self.hflip = RandomHorizontallyFlip()
         self.trans = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # maybe can optimized.
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  
         ])
 
     def __len__(self):
         return self.file_num 
 
     def __getitem__(self, index):
-        # file_name = self.mat_files[idx % self.file_num]
+
         image_path,label_path = self.imgs[index % self.file_num][:-1].split(' ')
         image = Image.open(self.root + image_path).convert('RGB').resize((400,400))
         label = Image.open(self.root + label_path).convert('L').resize((400,400))
-
-        # image,label = self.hflip(image,label)
 
         label = np.array(label,dtype='float32') / 255.0
         if len(label.shape) > 2:
             label = label[:,:,0]
         
         image_nom = self.trans(image)
-        # label = np.array([label])
 
         sample = {'O': image_nom,'B':label,'image':np.array(image)}
 
