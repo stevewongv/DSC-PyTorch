@@ -256,7 +256,7 @@ def run_train_val(ckp_name='latest'):
             if sess.step % 10 == 0:
                 sess.save_mask(sess.val_log_name, [batch_v['image'], batch_v['B'],pred_v])
             logger.info('save image as step_%d' % sess.step)
-        if sess.step % sess.save_steps == 0 and sess.step >= 30000:
+        if sess.step % (sess.save_steps * 5) == 0:
             sess.save_checkpoints('step_%d' % sess.step)
             logger.info('save model as step_%d' % sess.step)
         sess.step += 1
