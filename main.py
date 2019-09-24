@@ -19,10 +19,7 @@ import skimage.measure as ms
 import progressbar
 import skimage.io as io
 import PIL.Image as I
-# from single_dataset import Dataset
 from dataset import TrainValDataset, TestDataset
-# from cal_ssim import SSIM
-# from SPANet_1 import SPANet
 from misc import crf_refine
 import shutil
 from utils import MyWcploss
@@ -36,7 +33,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 torch.cuda.manual_seed_all(2018)
 torch.manual_seed(2018)
-# torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.benchmark = True
 
 
 def ensure_dir(dir_path):
@@ -65,7 +62,7 @@ class Session:
         self.bce = MyWcploss().to(self.device)
         
         self.step = 0
-        self.save_steps = 1000
+        self.save_steps = 200
         self.num_workers = 16
         self.batch_size = 4
         self.writers = {}
@@ -229,7 +226,7 @@ def run_train_val(ckp_name='latest'):
     dt_train = sess.get_dataloader(sess.train_data_path)
     dt_val = sess.get_dataloader(sess.train_data_path)
 
-    while sess.step < 5000:
+    while sess.step =< 5000:
         # sess.sche.step()
         sess.opt.param_groups[0]['lr'] = 2 * 5e-3 * (1 - float(sess.step) / 5000
                                                                 ) ** 0.9
@@ -252,7 +249,7 @@ def run_train_val(ckp_name='latest'):
             batch_v = next(dt_val)
             pred_v, loss_v, losses_v = sess.inf_batch(sess.val_log_name, batch_v)
             sess.write(sess.val_log_name, losses_v)
-        if sess.step % int(sess.save_steps / 16) == 0:
+        if sess.step % int(sess.save_steps / 5) == 0:
             sess.save_checkpoints('latest')
         if sess.step % int(sess.save_steps / 10) == 0:
             sess.save_mask(sess.log_name, [batch_t['image'],  batch_t['B'],pred_t])
