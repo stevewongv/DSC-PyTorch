@@ -226,7 +226,7 @@ def run_train_val(ckp_name='latest'):
     dt_train = sess.get_dataloader(sess.train_data_path)
     dt_val = sess.get_dataloader(sess.train_data_path)
 
-    while sess.step =< 5000:
+    while sess.step <= 5000:
         # sess.sche.step()
         sess.opt.param_groups[0]['lr'] = 2 * 5e-3 * (1 - float(sess.step) / 5000
                                                                 ) ** 0.9
