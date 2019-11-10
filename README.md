@@ -42,6 +42,36 @@ python3 main.py -a train
 python3 main.py -a test
 ```
 
+## Citation
+
+```
+@InProceedings{Hu_2018_CVPR,      
+    author = {Hu, Xiaowei and Zhu, Lei and Fu, Chi-Wing and Qin, Jing and Heng, Pheng-Ann},      
+    title = {Direction-Aware Spatial Context Features for Shadow Detection},      
+    booktitle = {The IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},      
+    pages={7454--7462},        
+    year = {2018}
+}
+
+@article{hu2019direction,   
+    author = {Hu, Xiaowei and Fu, Chi-Wing and Zhu, Lei and Qin, Jing and Heng, Pheng-Ann},    
+    title = {Direction-Aware Spatial Context Features for Shadow Detection and Removal},    
+    journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},    
+    year  = {2019},          
+    note={to appear}                  
+}
+
+Modified DSC module is used in SPANet:
+
+@InProceedings{Wang_2019_CVPR,
+  author = {Wang, Tianyu and Yang, Xin and Xu, Ke and Chen, Shaozhe and Zhang, Qiang and Lau, Rynson W.H.},
+  title = {Spatial Attentive Single-Image Deraining with a High Quality Real Rain Dataset},
+  booktitle = {The IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  month = {June},
+  year = {2019}
+}
+```
+
 ## TODO List
 * [x] ResNext101 Backbone
 * [x] Test on SBU Test Set
