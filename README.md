@@ -42,7 +42,7 @@ python3 main.py -a train
 python3 main.py -a test
 ```
 
-## Citation
+## Citations
 
 ```
 @InProceedings{Hu_2018_CVPR,      
