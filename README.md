@@ -12,7 +12,8 @@ We use two GTX 1080Ti to train the DSC on SBU dataset.
 | DSC (Caffe) | 5.59 |**0.97** |
 | DSC (Our) | **5.43** | 0.96 |
 
-* You can download the pre-trained model from [Google Drive](https://drive.google.com/file/d/17VfUOu5xwHHc3M05N0oCjF2FGGirw7gt/view?usp=sharing) and put it into `SBU_model` folder.
+**Pre-trained model is unavailable. You can train your own model.**
+<!-- * You can download the pre-trained model from [Google Drive](https://drive.google.com/file/d/17VfUOu5xwHHc3M05N0oCjF2FGGirw7gt/view?usp=sharing) and put it into `SBU_model` folder. -->
 
 * You can download the ResNeXt101 model from [Google Drive](https://drive.google.com/open?id=1EDUcaGNiakWO9Xvk9kWgkkcnTYZ6VQoT) and put it in main folder.
 
