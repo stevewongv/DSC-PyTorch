@@ -13,7 +13,7 @@ IRNNBackward = open('./IRNN_Backward_cuda.cu','r').read()
 # IRNNWeightBaisBackward = open('./IRNN_Weight_Bias_Backward_cuda.cu','r').read()
 
 
-@cupy.util.memoize(for_each_device=True)
+@cupy.memoize(for_each_device=True)
 def cunnex(strFunction):
 	return cupy.cuda.compile_with_cache(globals()[strFunction]).get_function(strFunction)
 # end
@@ -22,7 +22,7 @@ class irnn(torch.autograd.Function):
 	def __init__(self):
 		super(irnn, self).__init__()
 		
-
+	@staticmethod
 	def forward(self, input_feature, weight_up, weight_right, weight_down, weight_left, bias_up, bias_right, bias_down, bias_left):
 		
 
@@ -82,7 +82,7 @@ class irnn(torch.autograd.Function):
 		return output_up,output_right,output_down,output_left
 	# end
 	
-
+	@staticmethod
 	def backward(self, grad_output_up,grad_output_right,grad_output_down,grad_output_left):
 
 		input_feature,weight_up,weight_right,weight_down,weight_left,output_up,output_right,output_down,output_left = self.saved_tensors
