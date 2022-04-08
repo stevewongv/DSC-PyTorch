@@ -17,7 +17,7 @@ We use two GTX 1080Ti to train the DSC on SBU dataset.
 * You can download the ResNeXt101 model from [Google Drive](https://drive.google.com/open?id=1EDUcaGNiakWO9Xvk9kWgkkcnTYZ6VQoT) and put it in main folder.
 
 ## Requirements
-* PyTorch == 0.4.1 (1.0.x may not work for training)
+* PyTorch == 1.8.1 (training and testing)
 * Cupy ([Installation Guide](https://docs-cupy.chainer.org/en/stable/install.html#install-cupy))
 * TensorBoardX
 * Python3.6
