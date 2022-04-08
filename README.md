@@ -1,7 +1,7 @@
 # DSC-PyTorch
 This is a PyTorch implementation of ["Direction-Aware Spatial Context Features for Shadow Detection, CVPR'18"](https://arxiv.org/abs/1712.04142) and detection part of ["Direction-Aware Spatial Context Features for Shadow Detection and Removal, T-PAMI'19"](https://arxiv.org/abs/1805.04635) based on [Xiaowei](https://xw-hu.github.io)'s [DSC (Caffe)](https://github.com/xw-hu/DSC) written by Tianyu Wang.
 
-The Spacial IRNN is implemented by using CUDA 9.0. The backbone is ResNeXt101 pre-trained on ImageNet and the implementation of loss is from [Quanlong Zheng](https://quanlzheng.github.io). 
+The Spacial IRNN is implemented by using CUDA 11.x. The backbone is ResNeXt101 pre-trained on ImageNet and the implementation of loss is from [Quanlong Zheng](https://quanlzheng.github.io). 
 
 ## Results
 We use two GTX 1080Ti to train the DSC on SBU dataset.
@@ -20,7 +20,7 @@ We use two GTX 1080Ti to train the DSC on SBU dataset.
 * PyTorch == 1.8.1 (training and testing)
 * Cupy ([Installation Guide](https://docs-cupy.chainer.org/en/stable/install.html#install-cupy))
 * TensorBoardX
-* Python3.6
+* Python
 * progressbar2
 * scikit-image
 * pydensecrf
