@@ -1,5 +1,5 @@
 # DSC-PyTorch
-This is a PyTorch implementation of ["Direction-Aware Spatial Context Features for Shadow Detection, CVPR'18"](https://arxiv.org/abs/1712.04142) and detection part of ["Direction-Aware Spatial Context Features for Shadow Detection and Removal, T-PAMI'19"](https://arxiv.org/abs/1805.04635) based on [Xiaowei](https://xw-hu.github.io)'s [DSC (Caffe)](https://github.com/xw-hu/DSC) written by Tianyu Wang.
+This is a PyTorch implementation of ["Direction-Aware Spatial Context Features for Shadow Detection, CVPR'18"](https://arxiv.org/abs/1712.04142) and ["Direction-Aware Spatial Context Features for Shadow Detection and Removal, T-PAMI'19"](https://arxiv.org/abs/1805.04635) based on [Xiaowei](https://xw-hu.github.io)'s [DSC (Caffe)](https://github.com/xw-hu/DSC) written by Tianyu Wang.
 
 The Spacial IRNN is implemented by using CUDA 11.x. The backbone is ResNeXt101 pre-trained on ImageNet and the implementation of loss is from [Quanlong Zheng](https://quanlzheng.github.io). 
 
@@ -34,12 +34,14 @@ git clone https://github.com/stevewongv/DSC-PyTorch.git
 2. **Train**
 
 ```bash
-python3 main.py -a train
+python3 main.py -a train    # For Shadow Detection
+python3 main_sr.py -a train # For Shadow Removal
 ```
 3. **Test**
 
 ```bash
-python3 main.py -a test
+python3 main.py -a test    # For Shadow Detection
+python3 main_sr.py -a test # For Shadow Removal
 ```
 
 ## Citations
