@@ -36,7 +36,7 @@ logger.addHandler(ch)
 torch.cuda.manual_seed_all(2018)
 torch.manual_seed(2018)
 torch.backends.cudnn.benchmark = True
-torch.cuda.set_device(0)
+torch.cuda.set_device(1)
 
 iter_num = 320000 #160000
 
@@ -45,53 +45,71 @@ def ensure_dir(dir_path):
         os.makedirs(dir_path)
         
 
+class L2Loss(nn.Module):
+    def __init__(self):
+        super(L2Loss, self).__init__()
+
+    def forward(self, predicted, target):
+        return torch.mean((predicted - target) ** 2)
+
 class Session:
     def __init__(self):
         self.device = torch.device("cuda")
         
         # SRD
-        self.log_dir = './SRD256_logdir.v2_tanh'
-        self.model_dir = './SRD256_model.v2_tanh'
-        ensure_dir(self.log_dir)
+        self.log_dir = './SRD512_logdir.v13_ImageOriForResidual_L2_newLR'
+        self.model_dir = './SRD512_model.v13_ImageOriForResidual_L2_newLR'
+        # ensure_dir(self.log_dir)
         ensure_dir(self.model_dir)
-        self.log_name = 'train_SRD256_alpha_1'
-        self.val_log_name = 'val_SRD256_alpha_1'
+        self.log_name = 'train_SRD512_alpha_1'
+        self.val_log_name = 'val_SRD512_alpha_1'
         logger.info('set log dir as %s' % self.log_dir)
         logger.info('set model dir as %s' % self.model_dir)
-        # self.test_data_path = '/home/zhxing/Datasets/SRD_inpaint4shadow_fix/'
-        self.test_data_path = '/home/zhxing/Datasets/DESOBA_xvision/'
+        self.test_data_path = '/home/zhxing/Datasets/SRD_inpaint4shadow_fix/'
+        # self.test_data_path = '/home/zhxing/Datasets/DESOBA_xvision/'
         self.train_data_path = '/home/zhxing/Datasets/SRD_inpaint4shadow_fix/train_dsc.txt'
 
         # ISTD
-        # self.log_dir = './ISTD+256_logdir.v2_tanh'
-        # self.model_dir = './ISTD+256_model.v2_tanh'
+        # self.log_dir = './ISTD+512_logdir.v13_ImageOriForResidual_L2_newLR'
+        # self.model_dir = './ISTD+512_model.v13_ImageOriForResidual_L2_newLR'
         # ensure_dir(self.log_dir)
         # ensure_dir(self.model_dir)
-        # self.log_name = 'train_ISTD+256_alpha_1'
-        # self.val_log_name = 'val_ISTD+256_alpha_1'
+        # self.log_name = 'train_ISTD+512_alpha_1'
+        # self.val_log_name = 'val_ISTD+512_alpha_1'
         # logger.info('set log dir as %s' % self.log_dir)
         # logger.info('set model dir as %s' % self.model_dir)
         # self.test_data_path = '/home/zhxing/Datasets/ISTD+/'
-        # self.train_data_path = '/home/zhxing/Datasets/ISTD+/train_dsc+.txt'
+        # self.train_data_path = '/home/zhxing/Datasets/ISTD+/train_dsc.txt'
 
         self.multi_gpu = False
         self.net = DSC().to(self.device)
         # self.bce = MyWcploss().to(self.device)
-        self.l1_loss = ShadowRemovalL1Loss().to(self.device)
+        # self.l2_loss = ShadowRemovalL1Loss().to(self.device)
+        self.l2_loss = L2Loss().to(self.device)
+
+
         
         self.step = 0
         self.save_steps = 20000
         self.num_workers = 16
-        self.batch_size = 2 #4
+        self.batch_size = 2 #
         self.writers = {}
         self.dataloaders = {}
         self.shuffle = True
-        self.opt = optimizer = optim.SGD([
-        {'params': [param for name, param in self.net.named_parameters() if name[-4:] == 'bias'],
-         'lr': 2 * 5e-3},
-        {'params': [param for name, param in self.net.named_parameters() if name[-4:] != 'bias'],
-         'lr': 1 * 5e-3, 'weight_decay': 5e-4}
-        ], momentum= 0.9)
+        # self.opt = optimizer = optim.SGD([
+        # {'params': [param for name, param in self.net.named_parameters() if name[-4:] == 'bias'],
+        #  'lr': 2 * 5e-3},
+        # {'params': [param for name, param in self.net.named_parameters() if name[-4:] != 'bias'],
+        #  'lr': 1 * 5e-3, 'weight_decay': 5e-4}
+        # ], momentum= 0.9)
+
+        # Change optimizer to Adam
+        self.opt = optim.Adam([
+            {'params': [param for name, param in self.net.named_parameters() if name[-4:] == 'bias'],
+             'lr': 1e-5},  # Adjust learning rate for Adam
+            {'params': [param for name, param in self.net.named_parameters() if name[-4:] != 'bias'],
+             'lr': 1e-5, 'weight_decay': 5e-4}
+        ], betas=(0.9, 0.999))  # Typical beta values for Adam
 
     def tensorboard(self, name):
         self.writers[name] = SummaryWriter(os.path.join(self.log_dir, name + '.events'))
@@ -159,7 +177,7 @@ class Session:
         O, B = batch['O'], batch['B']
         O, B = O.to(self.device), B.to(self.device)
 
-        predicts = self.net(O)
+        predicts = self.net(O, batch['image_ori'])
         predict_4, predict_3, predict_2, predict_1, predict_0, predict_g, predict_f = predicts
         
         if name == 'test':
@@ -167,13 +185,13 @@ class Session:
             return predicts
 
         # Calculate losses without sigmoid
-        loss_4 = self.l1_loss(predict_4, B)
-        loss_3 = self.l1_loss(predict_3, B)
-        loss_2 = self.l1_loss(predict_2, B)
-        loss_1 = self.l1_loss(predict_1, B)
-        loss_0 = self.l1_loss(predict_0, B)
-        loss_g = self.l1_loss(predict_g, B)
-        loss_f = self.l1_loss(predict_f, B)
+        loss_4 = self.l2_loss(predict_4, B)
+        loss_3 = self.l2_loss(predict_3, B)
+        loss_2 = self.l2_loss(predict_2, B)
+        loss_1 = self.l2_loss(predict_1, B)
+        loss_0 = self.l2_loss(predict_0, B)
+        loss_g = self.l2_loss(predict_g, B)
+        loss_f = self.l2_loss(predict_f, B)
 
         loss = loss_4 + loss_3 + loss_2 + loss_1 + loss_0 + loss_g + loss_f
 
@@ -197,11 +215,17 @@ class Session:
 
         # 将数据和标签从LAB转换为RGB，并确保缩放和转换
         data = (data.numpy().transpose(0, 2, 3, 1) * 255).astype('uint8')  # 假设数据格式为 (N, C, H, W)
-        label = (label.numpy().transpose(0, 2, 3, 1) * 255).astype('uint8')  # 假设标签格式为 (N, C, H, W)
+        # label = (label.numpy().transpose(0, 2, 3, 1) * 255).astype('uint8')  # 假设标签格式为 (N, C, H, W)
+        label = (label.numpy().transpose(0, 2, 3, 1)).astype('uint8')  # 假设标签格式为 (N, C, H, W)
         
         # 将预测转换为numpy数组，确保它们是3通道图像并缩放到255
+        # predicts = [
+        #     (predict.cpu().data.numpy().transpose(0, 2, 3, 1) * 255).astype('float32')  # 假设预测格式为 (N, C, H, W)
+        #     for predict in predicts
+        # ]
+
         predicts = [
-            (predict.cpu().data.numpy().transpose(0, 2, 3, 1) * 255).astype('float32')  # 假设预测格式为 (N, C, H, W)
+            (predict.cpu().data.numpy().transpose(0, 2, 3, 1)).astype('float32')  # 假设预测格式为 (N, C, H, W)
             for predict in predicts
         ]
 
@@ -257,10 +281,20 @@ def run_train_val(ckp_name='latest'):
 
     while sess.step <= iter_num:
         # sess.sche.step()
-        sess.opt.param_groups[0]['lr'] = 2 * 5e-3 * (1 - float(sess.step) / iter_num
+
+        # # lr old
+        # sess.opt.param_groups[0]['lr'] = 2 * 5e-3 * (1 - float(sess.step) / iter_num
+        #                                                         ) ** 0.9
+        # sess.opt.param_groups[1]['lr'] = 5e-3 * (1 - float(sess.step) / iter_num
+        #                                                     ) ** 0.9
+
+        # lr new
+        sess.opt.param_groups[0]['lr'] = 2 * 5e-4 * (1 - float(sess.step) / iter_num
                                                                 ) ** 0.9
-        sess.opt.param_groups[1]['lr'] = 5e-3 * (1 - float(sess.step) / iter_num
+        sess.opt.param_groups[1]['lr'] = 5e-4 * (1 - float(sess.step) / iter_num
                                                             ) ** 0.9
+
+
         sess.net.train()
         sess.net.zero_grad()
         
@@ -293,6 +327,7 @@ def run_train_val(ckp_name='latest'):
             sess.save_checkpoints('step_%d' % sess.step)
             logger.info('save model as step_%d' % sess.step)
         sess.step += 1
+    sess.save_checkpoints('final')
 
 # Zhxing, for run_test function
 def ensure_dir(path):
@@ -337,10 +372,11 @@ def run_test(ckp_name):
         pred = sess.inf_batch('test', batch)
         end_time = time.time()
         time_all.append(end_time - start_time)
-        saved_pred = pred[-1]  # tensor, shape 1,3,256,256, value [-1,1], should scaled to LAB space and then scaled to rgb space to save the image
+        saved_pred = pred[-1]  # tensor, shape 1,3,512,512, value [-1,1], should scaled to LAB space and then scaled to rgb space to save the image
 
         # Scale the prediction to LAB space
-        saved_pred = (saved_pred.cpu().data.numpy().transpose(0, 2, 3, 1) * 255).astype('float32')  # (N, C, H, W) to (N, H, W, C)
+        saved_pred = (saved_pred.cpu().data.numpy().transpose(0, 2, 3, 1)).astype('float32')  # (N, C, H, W) to (N, H, W, C)
+
         
         # LAB to RGB conversion
         def lab_to_rgb(lab_img):
@@ -356,8 +392,8 @@ def run_test(ckp_name):
 
         # Save the image
         image_name = input_names[i].strip().split('/')[-1]
-        output_path = os.path.join('./test_sr/SRD256_DESOBA', image_name)
-        # output_path = os.path.join('./test_sr/ISTD+256', image_name)
+        output_path = os.path.join('./test_sr/SRD512_DESOBA', image_name)
+        # output_path = os.path.join('./test_sr/ISTD+512', image_name)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         Image.fromarray(saved_pred_rgb[0]).save(output_path)
         
