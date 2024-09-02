@@ -179,7 +179,7 @@ class DSC(nn.Module):
         self.global_predict = Predict(32, 3, 1)
         self.fusion_predict = Predict(18, 3, 1)
 
-    def forward(self, x):
+    def forward(self, x, x_non_norm):
         layer0 = self.layer0(x)
         layer1 = self.layer1(layer0)
         layer2 = self.layer2(layer1)
@@ -268,19 +268,6 @@ class DSC(nn.Module):
         fusion_predict = self.fusion_predict(fusion_concat)
         # print("fusion_predict:", fusion_predict.size())
 
-        # residual learning, zhxing
-        # save add term first then return
-        layer4_predict = layer4_predict + x
-        layer3_predict = layer3_predict + x
-        layer2_predict = layer2_predict + x
-        layer1_predict = layer1_predict + x
-        layer0_predict = layer0_predict + x
-        global_predict = global_predict + x
-        fusion_predict = fusion_predict + x
-        # all use .tanh()
-        return layer4_predict.tanh(), layer3_predict.tanh(), layer2_predict.tanh(), layer1_predict.tanh(), layer0_predict.tanh(), global_predict.tanh(), fusion_predict.tanh()
-
-
         # # residual learning, zhxing
         # # save add term first then return
         # layer4_predict = torch.clamp(layer4_predict + x, -1, 1)
@@ -293,3 +280,28 @@ class DSC(nn.Module):
         # # all use .clamp()
         # return layer4_predict, layer3_predict, layer2_predict, layer1_predict, layer0_predict, global_predict, fusion_predict
 
+
+        # v13, 15
+        # send x_non_norm to device
+        x_non_norm = x_non_norm.to(x.device)
+        layer4_predict = layer4_predict + x_non_norm
+        layer3_predict = layer3_predict + x_non_norm
+        layer2_predict = layer2_predict + x_non_norm
+        layer1_predict = layer1_predict + x_non_norm
+        layer0_predict = layer0_predict + x_non_norm
+        global_predict = global_predict + x_non_norm
+        fusion_predict = fusion_predict + x_non_norm
+        return layer4_predict, layer3_predict, layer2_predict, layer1_predict, layer0_predict, global_predict, fusion_predict
+
+
+        # v14
+        # send x_non_norm to device
+        # x_non_norm = x_non_norm.to(x.device)
+        # layer4_predict = layer4_predict.tanh() + x_non_norm
+        # layer3_predict = layer3_predict.tanh() + x_non_norm
+        # layer2_predict = layer2_predict.tanh() + x_non_norm
+        # layer1_predict = layer1_predict.tanh() + x_non_norm
+        # layer0_predict = layer0_predict.tanh() + x_non_norm
+        # global_predict = global_predict.tanh() + x_non_norm
+        # fusion_predict = fusion_predict.tanh() + x_non_norm
+        # return layer4_predict, layer3_predict, layer2_predict, layer1_predict, layer0_predict, global_predict, fusion_predict
