@@ -69,12 +69,7 @@ class TrainValDataset(Dataset):
         # print("label_lab shape: ", label_lab.shape)
 
         image_ori =  np.array(image_lab, dtype='float32').transpose(2, 0, 1)
-
-        # log13
         sample = {'O': image_nom, 'B': label_lab, 'image': np.array(image_lab, dtype='float32').transpose(2, 0, 1) / 255, "image_ori": np.array(image_lab, dtype='float32').transpose(2, 0, 1)}
-        
-        # log15
-        # sample = {'O': image_ori, 'B': label_lab, 'image': np.array(image_lab, dtype='float32').transpose(2, 0, 1) / 255, "image_ori": image_ori}
 
         return sample
 
@@ -133,10 +128,6 @@ class TestDataset(Dataset):
 
         image_ori =  np.array(image_lab, dtype='float32').transpose(2, 0, 1)
 
-        # sample = {'O': image_nom, 'B': label_lab, 'image': np.array(image_lab)}
-        # log15
-        # sample = {'O': image_ori, 'B': label_lab, 'image': np.array(image_lab), "image_ori": image_ori}
-        # log13
         sample = {'O': image_nom, 'B': label_lab, 'image': np.array(image_lab), "image_ori": image_ori}
 
 
