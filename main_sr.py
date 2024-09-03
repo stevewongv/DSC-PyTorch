@@ -20,7 +20,6 @@ import progressbar
 import skimage.io as io
 import PIL.Image as I
 from dataset_sr import TrainValDataset, TestDataset
-from misc import crf_refine
 import shutil
 from utils import MyWcploss, ShadowRemovalL1Loss
 import time
@@ -57,8 +56,8 @@ class Session:
         self.device = torch.device("cuda")
         
         # SRD
-        self.log_dir = './SRD512_logdir.v13_ImageOriForResidual_L2_newLR'
-        self.model_dir = './SRD512_model.v13_ImageOriForResidual_L2_newLR'
+        self.log_dir = './SRD512_logdir'
+        self.model_dir = './SRD512_model'
         # ensure_dir(self.log_dir)
         ensure_dir(self.model_dir)
         self.log_name = 'train_SRD512_alpha_1'
@@ -70,8 +69,8 @@ class Session:
         self.train_data_path = '/home/zhxing/Datasets/SRD_inpaint4shadow_fix/train_dsc.txt'
 
         # ISTD
-        # self.log_dir = './ISTD+512_logdir.v13_ImageOriForResidual_L2_newLR'
-        # self.model_dir = './ISTD+512_model.v13_ImageOriForResidual_L2_newLR'
+        # self.log_dir = './ISTD+512_logdir'
+        # self.model_dir = './ISTD+512_model'
         # ensure_dir(self.log_dir)
         # ensure_dir(self.model_dir)
         # self.log_name = 'train_ISTD+512_alpha_1'
@@ -282,13 +281,6 @@ def run_train_val(ckp_name='latest'):
     while sess.step <= iter_num:
         # sess.sche.step()
 
-        # # lr old
-        # sess.opt.param_groups[0]['lr'] = 2 * 5e-3 * (1 - float(sess.step) / iter_num
-        #                                                         ) ** 0.9
-        # sess.opt.param_groups[1]['lr'] = 5e-3 * (1 - float(sess.step) / iter_num
-        #                                                     ) ** 0.9
-
-        # lr new
         sess.opt.param_groups[0]['lr'] = 2 * 5e-4 * (1 - float(sess.step) / iter_num
                                                                 ) ** 0.9
         sess.opt.param_groups[1]['lr'] = 5e-4 * (1 - float(sess.step) / iter_num
@@ -329,14 +321,10 @@ def run_train_val(ckp_name='latest'):
         sess.step += 1
     sess.save_checkpoints('final')
 
-# Zhxing, for run_test function
+# for run_test function
 def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
-
-def crf_refine(image, prediction):
-    # Dummy implementation of crf_refine, replace with your actual implementation
-    return prediction  # Modify as per your actual CRF implementation
 
 import os
 import time
