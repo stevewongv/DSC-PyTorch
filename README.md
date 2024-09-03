@@ -55,12 +55,12 @@ python3 main_sr.py -a test # For Shadow Removal
     year = {2018}
 }
 
-@article{hu2019direction,   
-    author = {Hu, Xiaowei and Fu, Chi-Wing and Zhu, Lei and Qin, Jing and Heng, Pheng-Ann},    
-    title = {Direction-Aware Spatial Context Features for Shadow Detection and Removal},    
-    journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},    
-    year  = {2019},          
-    note={to appear}                  
+@article{hu2020direction,
+     author = {Hu, Xiaowei and Fu, Chi-Wing and Zhu, Lei and Qin, Jing and Heng, Pheng-Ann},
+     title = {Direction-Aware Spatial Context Features for Shadow Detection and Removal},
+     journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+     pages={2795--2808},
+     year = {2020}
 }
 
 Modified DSC module is used in SPANet:
