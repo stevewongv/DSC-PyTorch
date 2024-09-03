@@ -154,18 +154,6 @@ class DSC(nn.Module):
 
         self.global_conv = LayerConv(160, 32, 1, 1, 0, True)
 
-        # self.layer4_predict = Predict(32, 1, 1)
-        # self.layer3_predict_ori = Predict(32, 1, 1)
-        # self.layer3_predict = Predict(2, 1, 1)
-        # self.layer2_predict_ori = Predict(32, 1, 1)
-        # self.layer2_predict = Predict(3, 1, 1)
-        # self.layer1_predict_ori = Predict(32, 1, 1)
-        # self.layer1_predict = Predict(4, 1, 1)
-        # self.layer0_predict_ori = Predict(32, 1, 1)
-        # self.layer0_predict = Predict(5, 1, 1)
-        # self.global_predict = Predict(32, 1, 1)
-        # self.fusion_predict = Predict(6, 1, 1)  
-
         # output channel to 3
         self.layer4_predict = Predict(32, 3, 1)
         self.layer3_predict_ori = Predict(32, 3, 1)
@@ -249,39 +237,11 @@ class DSC(nn.Module):
 
         global_predict = self.global_predict(global_conv)
 
-        # print("layer0_up:", layer0_up.size())
-        # print("layer1_up:", layer1_up.size())
-        # print("layer2_up:", layer2_up.size())
-        # print("layer3_up:", layer3_up.size())
-        # print("layer4_up:", layer4_up.size())
-
-        # print("layer0_predict:", layer0_predict.size())
-        # print("layer1_predict:", layer1_predict.size())
-        # print("layer2_predict:", layer2_predict.size())
-        # print("layer3_predict:", layer3_predict.size())
-        # print("layer4_predict:", layer4_predict.size())
-        # print("global_predict:", global_predict.size())
-        # print("x:", x.size())
-
         # fusion
         fusion_concat = torch.cat((layer0_predict, layer1_predict, layer2_predict, layer3_predict, layer4_predict, global_predict), 1)
         fusion_predict = self.fusion_predict(fusion_concat)
-        # print("fusion_predict:", fusion_predict.size())
-
-        # # residual learning, zhxing
-        # # save add term first then return
-        # layer4_predict = torch.clamp(layer4_predict + x, -1, 1)
-        # layer3_predict = torch.clamp(layer3_predict + x, -1, 1)
-        # layer2_predict = torch.clamp(layer2_predict + x, -1, 1)
-        # layer1_predict = torch.clamp(layer1_predict + x, -1, 1)
-        # layer0_predict = torch.clamp(layer0_predict + x, -1, 1)
-        # global_predict = torch.clamp(global_predict + x, -1, 1)
-        # fusion_predict = torch.clamp(fusion_predict + x, -1, 1)
-        # # all use .clamp()
-        # return layer4_predict, layer3_predict, layer2_predict, layer1_predict, layer0_predict, global_predict, fusion_predict
 
 
-        # v13, 15
         # send x_non_norm to device
         x_non_norm = x_non_norm.to(x.device)
         layer4_predict = layer4_predict + x_non_norm
@@ -293,15 +253,3 @@ class DSC(nn.Module):
         fusion_predict = fusion_predict + x_non_norm
         return layer4_predict, layer3_predict, layer2_predict, layer1_predict, layer0_predict, global_predict, fusion_predict
 
-
-        # v14
-        # send x_non_norm to device
-        # x_non_norm = x_non_norm.to(x.device)
-        # layer4_predict = layer4_predict.tanh() + x_non_norm
-        # layer3_predict = layer3_predict.tanh() + x_non_norm
-        # layer2_predict = layer2_predict.tanh() + x_non_norm
-        # layer1_predict = layer1_predict.tanh() + x_non_norm
-        # layer0_predict = layer0_predict.tanh() + x_non_norm
-        # global_predict = global_predict.tanh() + x_non_norm
-        # fusion_predict = fusion_predict.tanh() + x_non_norm
-        # return layer4_predict, layer3_predict, layer2_predict, layer1_predict, layer0_predict, global_predict, fusion_predict
