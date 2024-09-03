@@ -22,7 +22,6 @@ import PIL.Image as I
 from dataset_sr import TrainValDataset, TestDataset
 import shutil
 from utils import MyWcploss, ShadowRemovalL1Loss
-import time
 
 
 logger = logging.getLogger('train')
@@ -82,8 +81,6 @@ class Session:
 
         self.multi_gpu = False
         self.net = DSC().to(self.device)
-        # self.bce = MyWcploss().to(self.device)
-        # self.l2_loss = ShadowRemovalL1Loss().to(self.device)
         self.l2_loss = L2Loss().to(self.device)
 
 
@@ -95,14 +92,6 @@ class Session:
         self.writers = {}
         self.dataloaders = {}
         self.shuffle = True
-        # self.opt = optimizer = optim.SGD([
-        # {'params': [param for name, param in self.net.named_parameters() if name[-4:] == 'bias'],
-        #  'lr': 2 * 5e-3},
-        # {'params': [param for name, param in self.net.named_parameters() if name[-4:] != 'bias'],
-        #  'lr': 1 * 5e-3, 'weight_decay': 5e-4}
-        # ], momentum= 0.9)
-
-        # Change optimizer to Adam
         self.opt = optim.Adam([
             {'params': [param for name, param in self.net.named_parameters() if name[-4:] == 'bias'],
              'lr': 1e-5},  # Adjust learning rate for Adam
@@ -327,7 +316,6 @@ def ensure_dir(path):
         os.makedirs(path)
 
 import os
-import time
 import numpy as np
 import torch.nn as nn
 import progressbar
@@ -354,12 +342,8 @@ def run_test(ckp_name):
     widgets = [progressbar.Percentage(), progressbar.Bar(), progressbar.ETA()]
     bar = progressbar.ProgressBar(widgets=widgets, maxval=len(dt)).start()
     
-    time_all = []
     for i, batch in enumerate(dt):
-        start_time = time.time()
         pred = sess.inf_batch('test', batch)
-        end_time = time.time()
-        time_all.append(end_time - start_time)
         saved_pred = pred[-1]  # tensor, shape 1,3,512,512, value [-1,1], should scaled to LAB space and then scaled to rgb space to save the image
 
         # Scale the prediction to LAB space
@@ -387,9 +371,6 @@ def run_test(ckp_name):
         
         bar.update(i + 1)
     
-    avg_time = np.mean(time_all)
-    avg_fps = 1 / avg_time
-    print(f'Inference speed: {avg_fps:.2f} images/second')
 
     bar.finish()
 
